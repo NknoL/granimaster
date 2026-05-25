@@ -6,15 +6,36 @@ import CityTabs from '../components/CityTabs'
 
 const PLACES = {
   Bucaramanga: [
-    "Granifreseo", "Mundo8ice", "Frozen Shark", "Trinislush", "Granibucaros",
-    "Crack granizados", "Tamy ice", "420Slushy", "Mafia cocktails", "Necati cocktails",
-    "Granilocos", "Eclipse cocktail", "Blueice", "Ice flow", "Nova ice"
+    { name: "Granifreseo", instagram: "@granifreseo11" },
+    { name: "Mundo8ice", instagram: "@granizados_mundo8ice_bga" },
+    { name: "Frozen Shark", instagram: "@frozenshark_11" },
+    { name: "Trinislush", instagram: "@trinislush" },
+    { name: "Granibucaros", instagram: "@grani_bucaros" },
+    { name: "Crack granizados", instagram: "@crack.granizados" },
+    { name: "Tamy ice", instagram: "@tamy_ice" },
+    { name: "420Slushy", instagram: "@420slushy_" },
+    { name: "Mafia cocktails", instagram: "@mafiacocktails" },
+    { name: "Necati cocktails", instagram: "@necati.cocktails" },
+    { name: "Granilocos", instagram: "@granilocos__oficial" },
+    { name: "Eclipse cocktail", instagram: "@eclipsecocktail" },
+    { name: "Blueice", instagram: "@blueicegranizado" },
+    { name: "Ice flow", instagram: "@iceflowbga" },
+    { name: "Nova ice", instagram: "@novaiceoficiall" }
   ],
   Girón: [
-    "Graniizu ice", "Luna yena", "Urban slush", "Exotic slush", "Cool hot"
+    { name: "Graniizu ice", instagram: "@graniizu_ice" },
+    { name: "Luna yena", instagram: "@granizadoslunayena" },
+    { name: "Urban slush", instagram: "@urban_slush" },
+    { name: "Exotic slush", instagram: "@exoticslushbga" },
+    { name: "Cool hot", instagram: "@granizadoscoolhot" }
   ],
   Floridablanca: [
-    "Refreshment station", "Granifreseo", "Crazy Drinks", "Portal granizados", "Spacebuddies", "Mafia"
+    { name: "Refreshment station", instagram: "@refreshment_station" },
+    { name: "Crazy Drinks", instagram: "@crazydrinks30" },
+    { name: "Portal granizados", instagram: "@portal_granizados" },
+    { name: "Spacebuddies", instagram: "@spacebuddiesoficial" },
+    { name: "Mafia", instagram: "@mafia_lacumbre" },
+    { name: "Granifreseo", instagram: "@granifreseo11" }
   ]
 }
 
@@ -85,6 +106,7 @@ export default function VotingPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
+      {/* Header */}
       <div className="text-center mb-10">
         <div className="inline-block px-4 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium tracking-[3px] mb-4">
           CONCURSO 2026
@@ -97,14 +119,17 @@ export default function VotingPage() {
 
       <CityTabs active={activeCity} onChange={setActiveCity} />
 
+      {/* Grid de lugares */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-        {cityPlaces.map(place => (
+        {cityPlaces.map(placeObj => (
           <PlaceCard
-            key={place}
-            place={place}
-            count={cityCounts[place] || 0}
+            key={placeObj.name}
+            place={placeObj.name}
+            instagram={placeObj.instagram}
+            count={cityCounts[placeObj.name] || 0}
             hasVoted={voted[activeCity]}
-            onVote={() => handleVote(activeCity, place)}
+            onVote={() => handleVote(activeCity, placeObj.name)}
+            // image={}   ← aquí después pones la foto cuando me la des
           />
         ))}
       </div>
