@@ -78,7 +78,7 @@ export default function VotingPage() {
 
   const submitVote = async () => {
     if (!cedulaInput.trim()) {
-      toast.error('Ingresa tu número de cédula')
+      toast.error('Por favor ingresa tu número de cédula')
       return
     }
     setIsSubmitting(true)
@@ -113,7 +113,7 @@ export default function VotingPage() {
     setVoted(newVoted)
     localStorage.setItem('granimaster_voted', JSON.stringify(newVoted))
 
-    toast.success('¡Voto registrado correctamente!')
+    toast.success('¡Voto registrado con éxito!')
     setShowCedulaModal(false)
     setCedulaInput('')
     setIsSubmitting(false)
@@ -123,22 +123,29 @@ export default function VotingPage() {
   const cityPlaces = PLACES[activeCity] || []
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
+    <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Header */}
-      <div className="text-center mb-10">
+      <div className="text-center mb-12">
         <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium tracking-[3px] mb-4">
           CONCURSO 2026
         </div>
-        <h1 className="text-6xl md:text-7xl font-bold tracking-tighter">Elige el mejor granizado</h1>
-        <p className="text-xl text-zinc-400 mt-3 max-w-lg mx-auto">
+        <h1 className="text-6xl md:text-7xl font-bold tracking-tighter mb-3">
+          Elige el mejor granizado
+        </h1>
+        <p className="text-xl text-zinc-400 max-w-md mx-auto">
           Vota por tu lugar favorito. Un voto por ciudad.
         </p>
       </div>
 
-      {!CONCURSO_FINALIZADO && <CityTabs active={activeCity} onChange={setActiveCity} />}
+      {/* Tabs de ciudades */}
+      {!CONCURSO_FINALIZADO && (
+        <div className="mb-8">
+          <CityTabs active={activeCity} onChange={setActiveCity} />
+        </div>
+      )}
 
-      {/* Tarjetas de votación */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+      {/* Grid de tarjetas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {cityPlaces.map(placeObj => (
           <PlaceCard
             key={placeObj.name}
@@ -150,28 +157,32 @@ export default function VotingPage() {
         ))}
       </div>
 
-      {/* Modal de Cédula */}
+      {/* Modal de Cédula - Mejorado */}
       {showCedulaModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
           <div className="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md p-8">
             <div className="text-center mb-6">
-              <div className="mx-auto w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4">
-                <span className="text-3xl">🪪</span>
+              <div className="mx-auto w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4">
+                <span className="text-4xl">🪪</span>
               </div>
-              <h3 className="text-2xl font-bold">Verificación de Voto</h3>
+              <h3 className="text-2xl font-bold">Verificación de identidad</h3>
               <p className="text-zinc-400 mt-2 text-sm">
-                Ingresa tu número de cédula para registrar tu voto en <strong>{activeCity}</strong>
+                Ingresa tu cédula para registrar tu voto en <strong>{activeCity}</strong>
               </p>
             </div>
 
-            <input
-              type="text"
-              value={cedulaInput}
-              onChange={(e) => setCedulaInput(e.target.value)}
-              placeholder="Número de cédula"
-              className="w-full bg-black border border-zinc-700 focus:border-cyan-500 rounded-2xl px-6 py-4 text-2xl tracking-[6px] text-center outline-none mb-6 font-mono"
-              disabled={isSubmitting}
-            />
+            <div className="mb-6">
+              <label className="text-xs text-zinc-400 block mb-2">NÚMERO DE CÉDULA</label>
+              <input
+                type="text"
+                value={cedulaInput}
+                onChange={(e) => setCedulaInput(e.target.value)}
+                placeholder="Ej: 1098765432"
+                className="w-full bg-black border border-zinc-700 focus:border-[#D4AF77] rounded-2xl px-6 py-4 text-2xl tracking-[4px] text-center outline-none font-mono"
+                disabled={isSubmitting}
+                onKeyDown={(e) => e.key === 'Enter' && submitVote()}
+              />
+            </div>
 
             <div className="flex gap-3">
               <button
@@ -179,28 +190,30 @@ export default function VotingPage() {
                   setShowCedulaModal(false)
                   setCedulaInput('')
                 }}
-                className="flex-1 py-3.5 rounded-2xl border border-zinc-700 hover:bg-zinc-800 transition disabled:opacity-50"
+                className="flex-1 py-3.5 rounded-2xl border border-zinc-700 hover:bg-zinc-800 transition text-sm font-medium"
               >
                 Cancelar
               </button>
               <button
                 onClick={submitVote}
                 disabled={isSubmitting || !cedulaInput.trim()}
-                className="flex-1 py-3.5 rounded-2xl bg-[#D4AF77] text-black font-semibold hover:bg-[#f0d9b0] transition disabled:opacity-50"
+                className="flex-1 py-3.5 rounded-2xl bg-[#D4AF77] text-black font-semibold hover:bg-[#f0d9b0] transition disabled:opacity-60 text-sm"
               >
-                {isSubmitting ? "Registrando..." : "Confirmar Voto"}
+                {isSubmitting ? "Registrando voto..." : "Confirmar mi voto"}
               </button>
             </div>
 
             <p className="text-center text-[10px] text-zinc-500 mt-5">
-              Tu cédula se usa únicamente para evitar votos duplicados.
+              Tu cédula solo se utiliza para evitar votos duplicados.
             </p>
           </div>
         </div>
       )}
 
       <div className="mt-12 text-center text-xs text-zinc-500">
-        Los conteos se activarán cuando finalice el concurso.
+        {CONCURSO_FINALIZADO 
+          ? "Resultados oficiales del concurso" 
+          : "Los conteos se activarán al finalizar el concurso"}
       </div>
     </div>
   )
