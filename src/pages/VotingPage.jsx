@@ -113,7 +113,7 @@ export default function VotingPage() {
     setVoted(newVoted)
     localStorage.setItem('granimaster_voted', JSON.stringify(newVoted))
 
-    toast.success('¡Voto registrado!')
+    toast.success('¡Voto registrado correctamente!')
     setShowCedulaModal(false)
     setCedulaInput('')
     setIsSubmitting(false)
@@ -122,103 +122,28 @@ export default function VotingPage() {
 
   const cityPlaces = PLACES[activeCity] || []
 
-  // === Calcular Top 3 General y por ciudad ===
-  const allPlacesWithVotes = []
-  Object.keys(PLACES).forEach(city => {
-    PLACES[city].forEach(place => {
-      allPlacesWithVotes.push({
-        city,
-        name: place.name,
-        votos: counts[city]?.[place.name] || 0
-      })
-    })
-  })
-
-  const top3General = [...allPlacesWithVotes]
-    .sort((a, b) => b.votos - a.votos)
-    .slice(0, 3)
-
-  const getTop3ByCity = (city) => {
-    return PLACES[city]
-      .map(p => ({
-        name: p.name,
-        votos: counts[city]?.[p.name] || 0
-      }))
-      .sort((a, b) => b.votos - a.votos)
-      .slice(0, 3)
-  }
-
-  if (CONCURSO_FINALIZADO) {
-    return (
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        <div className="text-center mb-10">
-          <div className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-sm font-medium mb-4">
-            CONCURSO FINALIZADO
-          </div>
-          <h1 className="text-6xl font-bold tracking-tighter">Resultados Oficiales</h1>
-        </div>
-
-        {/* Top 3 General */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4 text-center">🏆 Top 3 General</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {top3General.map((place, index) => (
-              <div key={index} className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 text-center">
-                <div className="text-4xl mb-2">{index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}</div>
-                <div className="font-semibold text-lg">{place.name}</div>
-                <div className="text-sm text-zinc-400">{place.city}</div>
-                <div className="text-4xl font-mono font-bold text-cyan-400 mt-2">{place.votos}</div>
-                <div className="text-sm text-zinc-400">votos</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Top 3 por Ciudad */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-6 text-center">Top 3 por Ciudad</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {Object.keys(PLACES).map(city => {
-              const top3 = getTop3ByCity(city)
-              return (
-                <div key={city} className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-                  <h3 className="font-semibold text-xl mb-4 text-center">{city}</h3>
-                  <div className="space-y-4">
-                    {top3.map((place, index) => (
-                      <div key={index} className="flex justify-between items-center border-b border-zinc-800 pb-3 last:border-none">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl">{index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}</span>
-                          <span className="font-medium">{place.name}</span>
-                        </div>
-                        <span className="font-mono text-cyan-400 font-semibold">{place.votos} votos</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Modo votación normal
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
+      {/* Header */}
       <div className="text-center mb-10">
+        <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium tracking-[3px] mb-4">
+          CONCURSO 2026
+        </div>
         <h1 className="text-6xl md:text-7xl font-bold tracking-tighter">Elige el mejor granizado</h1>
+        <p className="text-xl text-zinc-400 mt-3 max-w-lg mx-auto">
+          Vota por tu lugar favorito. Un voto por ciudad.
+        </p>
       </div>
 
-      <CityTabs active={activeCity} onChange={setActiveCity} />
+      {!CONCURSO_FINALIZADO && <CityTabs active={activeCity} onChange={setActiveCity} />}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-        {PLACES[activeCity].map(placeObj => (
+      {/* Tarjetas de votación */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        {cityPlaces.map(placeObj => (
           <PlaceCard
             key={placeObj.name}
             place={placeObj.name}
             instagram={placeObj.instagram}
-            count={0}
             hasVoted={voted[activeCity]}
             onVote={() => handleVoteClick(placeObj.name)}
           />
@@ -235,7 +160,7 @@ export default function VotingPage() {
               </div>
               <h3 className="text-2xl font-bold">Verificación de Voto</h3>
               <p className="text-zinc-400 mt-2 text-sm">
-                Ingresa tu cédula para confirmar tu voto en <strong>{activeCity}</strong>
+                Ingresa tu número de cédula para registrar tu voto en <strong>{activeCity}</strong>
               </p>
             </div>
 
@@ -250,22 +175,33 @@ export default function VotingPage() {
 
             <div className="flex gap-3">
               <button
-                onClick={() => setShowCedulaModal(false)}
-                className="flex-1 py-3.5 rounded-2xl border border-zinc-700 hover:bg-zinc-800 transition"
+                onClick={() => {
+                  setShowCedulaModal(false)
+                  setCedulaInput('')
+                }}
+                className="flex-1 py-3.5 rounded-2xl border border-zinc-700 hover:bg-zinc-800 transition disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={submitVote}
                 disabled={isSubmitting || !cedulaInput.trim()}
-                className="flex-1 py-3.5 rounded-2xl bg-white text-black font-semibold hover:bg-cyan-400 transition"
+                className="flex-1 py-3.5 rounded-2xl bg-[#D4AF77] text-black font-semibold hover:bg-[#f0d9b0] transition disabled:opacity-50"
               >
                 {isSubmitting ? "Registrando..." : "Confirmar Voto"}
               </button>
             </div>
+
+            <p className="text-center text-[10px] text-zinc-500 mt-5">
+              Tu cédula se usa únicamente para evitar votos duplicados.
+            </p>
           </div>
         </div>
       )}
+
+      <div className="mt-12 text-center text-xs text-zinc-500">
+        Los conteos se activarán cuando finalice el concurso.
+      </div>
     </div>
   )
 }
