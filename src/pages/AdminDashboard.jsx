@@ -164,7 +164,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {top3General.length > 0 ? top3General.map(([place, votos], i) => (
             <div key={i} className="border border-zinc-800 rounded-lg p-4 text-center">
-              <div className="text-2xl mb-1">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
+              <div className="text-2xl mb-1">{i === 0 ? '' : i === 1 ? '' : ''}</div>
               <p className="text-sm font-medium text-white">{place}</p>
               <p className="text-3xl font-mono font-bold text-white mt-1 tabular-nums">{votos}</p>
             </div>
