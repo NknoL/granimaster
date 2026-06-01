@@ -6,11 +6,7 @@ import CityTabs from '../components/CityTabs'
 import { LogIn, LogOut } from 'lucide-react'
 
 const PLACES = {
-  Bucaramanga: [
-    "Granifreseo", "Mundo8ice", "Frozen Shark", "Trinislush", "Granibucaros",
-    "Crack granizados", "Tamy ice", "420Slushy", "Mafia cocktails", "Necati cocktails",
-    "Granilocos", "Eclipse cocktail", "Blueice", "Ice flow", "Nova ice"
-  ],
+  Bucaramanga: ["Granifreseo", "Mundo8ice", "Frozen Shark", "Trinislush", "Granibucaros", "Crack granizados", "Tamy ice", "420Slushy", "Mafia cocktails", "Necati cocktails", "Granilocos", "Eclipse cocktail", "Blueice", "Ice flow", "Nova ice"],
   Girón: ["Graniizu ice", "Luna yena", "Urban slush", "Exotic slush", "Cool hot"],
   Floridablanca: ["Refreshment station", "Granifreseo", "Crazy Drinks", "Portal granizados", "Spacebuddies", "Mafia"]
 }
@@ -22,81 +18,74 @@ export default function VotingPage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // Cargar datos iniciales
+  const loadUserData = async (currentUser) => {
+    const promises = [supabase.from('votes').select('city, place')]
+
+    if (currentUser) {
+      promises.push(
+        supabase.from('votes').select('city, place').eq('user_id', currentUser.id)
+      )
+    }
+
+    const [allVotes, userVotes] = await Promise.all(promises)
+
+    // Conteos globales
+    const grouped = {}
+    allVotes.data?.forEach(v => {
+      if (!grouped[v.city]) grouped[v.city] = {}
+      grouped[v.city][v.place] = (grouped[v.city][v.place] || 0) + 1
+    })
+    setCounts(grouped)
+
+    // Votos del usuario
+    if (userVotes?.data) {
+      const userVoted = {}
+      userVotes.data.forEach(v => {
+        userVoted[v.city] = v.place
+      })
+      setVoted(userVoted)
+    }
+  }
+
   useEffect(() => {
-    const loadData = async () => {
+    const init = async () => {
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       setUser(currentUser)
-
-      const promises = [supabase.from('votes').select('city, place')]
-
-      if (currentUser) {
-        promises.push(supabase.from('votes').select('city, place').eq('user_id', currentUser.id))
-      }
-
-      const [allVotesRes, userVotesRes] = await Promise.all(promises)
-
-      const grouped = {}
-      allVotesRes.data?.forEach(vote => {
-        if (!grouped[vote.city]) grouped[vote.city] = {}
-        grouped[vote.city][vote.place] = (grouped[vote.city][vote.place] || 0) + 1
-      })
-      setCounts(grouped)
-
-      if (userVotesRes?.data) {
-        const userVoted = {}
-        userVotesRes.data.forEach(v => {
-          userVoted[v.city] = v.place
-        })
-        setVoted(userVoted)
-      }
-
+      await loadUserData(currentUser)
       setLoading(false)
     }
 
-    loadData()
+    init()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user || null
-      setUser(currentUser)
-
-      if (currentUser) {
-        const { data } = await supabase.from('votes').select('city, place').eq('user_id', currentUser.id)
-        const userVoted = {}
-        data?.forEach(v => { userVoted[v.city] = v.place })
-        setVoted(userVoted)
-      } else {
-        setVoted({})
+    // Escuchar cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        const currentUser = session?.user || null
+        setUser(currentUser)
+        await loadUserData(currentUser)
       }
-    })
+    )
 
     return () => subscription.unsubscribe()
   }, [])
 
-  // ====================== NUEVA LÓGICA: 5 segundos de carga ======================
+  // Lógica de 5 segundos de carga (ya la tenías)
   useEffect(() => {
     let timer
-
     if (loading) {
       timer = setTimeout(() => {
-        // Si después de 5 segundos sigue cargando
         alert("CONEXION DE INTERNET INESTABLE")
-
-        // Limpiar almacenamiento
         localStorage.clear()
         sessionStorage.clear()
-
         if ('caches' in window) {
           caches.keys().then(keys => keys.forEach(key => caches.delete(key)))
         }
-
-        // Recargar la página
         window.location.reload()
-      }, 5000) // 5 segundos
+      }, 5000)
     }
-
     return () => clearTimeout(timer)
   }, [loading])
-  // ============================================================================
 
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
@@ -169,10 +158,7 @@ export default function VotingPage() {
             <span className="text-sm text-zinc-400">Conectado como:</span>{' '}
             <span className="font-medium text-white">{user.email}</span>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 px-5 py-2 text-sm rounded-xl bg-zinc-800 hover:bg-red-950 text-red-400 w-full md:w-auto"
-          >
+          <button onClick={handleLogout} className="flex items-center gap-2 px-5 py-2 text-sm rounded-xl bg-zinc-800 hover:bg-red-950 text-red-400">
             <LogOut size={16} /> Cerrar sesión
           </button>
         </div>
@@ -194,10 +180,7 @@ export default function VotingPage() {
 
       {!user && (
         <div className="mt-10 text-center">
-          <button
-            onClick={signInWithGoogle}
-            className="px-8 py-3.5 bg-white text-black font-semibold rounded-2xl flex items-center gap-3 mx-auto hover:bg-cyan-400 transition"
-          >
+          <button onClick={signInWithGoogle} className="px-8 py-3.5 bg-white text-black font-semibold rounded-2xl flex items-center gap-3 mx-auto hover:bg-cyan-400 transition">
             <LogIn size={20} /> Iniciar sesión con Google para votar
           </button>
         </div>
