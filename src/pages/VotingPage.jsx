@@ -123,30 +123,38 @@ export default function VotingPage() {
   const cityPlaces = PLACES[activeCity] || []
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium tracking-[3px] mb-4">
-          CONCURSO 2026
+    <div className="max-w-6xl mx-auto px-6 py-10 relative">
+      
+      {/* Fondo translúcido con avatar.jpg */}
+      <div 
+        className="absolute inset-0 bg-[url('/avatar.jpg')] bg-cover bg-center opacity-10 pointer-events-none"
+      ></div>
+
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium tracking-[3px] mb-4">
+            CONCURSO 2026
+          </div>
+          <h1 className="text-6xl md:text-7xl font-bold tracking-tighter">Elige el mejor granizado</h1>
+          <p className="text-xl text-zinc-400 mt-3">Vota por tu lugar favorito. Un voto por ciudad.</p>
         </div>
-        <h1 className="text-6xl md:text-7xl font-bold tracking-tighter">Elige el mejor granizado</h1>
-        <p className="text-xl text-zinc-400 mt-3">Vota por tu lugar favorito. Un voto por ciudad.</p>
-      </div>
 
-      {/* Tabs */}
-      {!CONCURSO_FINALIZADO && <CityTabs active={activeCity} onChange={setActiveCity} />}
+        {/* Tabs */}
+        {!CONCURSO_FINALIZADO && <CityTabs active={activeCity} onChange={setActiveCity} />}
 
-      {/* Tarjetas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-        {cityPlaces.map(placeObj => (
-          <PlaceCard
-            key={placeObj.name}
-            place={placeObj.name}
-            instagram={placeObj.instagram}
-            hasVoted={voted[activeCity]}
-            onVote={() => handleVoteClick(placeObj.name)}
-          />
-        ))}
+        {/* Tarjetas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+          {cityPlaces.map(placeObj => (
+            <PlaceCard
+              key={placeObj.name}
+              place={placeObj.name}
+              instagram={placeObj.instagram}
+              hasVoted={voted[activeCity]}
+              onVote={() => handleVoteClick(placeObj.name)}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Modal de Cédula */}
