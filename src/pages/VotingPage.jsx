@@ -189,13 +189,13 @@ export default function VotingPage() {
           animate="show"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold tracking-[3px] uppercase mb-5">
-            Concurso 2026
+            EDICION 2026
           </div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-none">
             Elige el mejor granizado
           </h1>
           <p className="text-zinc-400 mt-3 text-base">
-            Inicia sesión con Google · 1 voto por ciudad
+            Inicia sesión con Google para votar
           </p>
 
           {/* Instagram */}

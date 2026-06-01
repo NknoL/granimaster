@@ -4,6 +4,18 @@
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #09090b;
+  background-image: 
+    linear-gradient(rgba(9, 9, 11, 0.80), rgba(9, 9, 11, 0.80)),
+    url('/avatar.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+h1, h2, h3 {
+  color: #f5f5f5;
 }
 
 button {
@@ -12,29 +24,4 @@ button {
 
 button:active {
   transform: scale(0.985);
-}
-
-body {
-  background-color: #0A0A0A;
-}
-
-h1, h2, h3 {
-  color: #f5f5f5;
-}
-
-/* Fondo global con avatar translúcido */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-image: url('/avatar.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.18;          /* ← ajusta entre 0.10 y 0.25 a tu gusto */
-}
-
-body {
-  background-color: #09090b; /* zinc-950 */
 }
