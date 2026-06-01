@@ -5,8 +5,6 @@ import { Toaster } from 'sonner'
 
 import VotingPage from './pages/VotingPage'
 import AdminDashboard from './pages/AdminDashboard'
-import SecretPanel from './pages/SecretPanel'
-
 function App() {
   // Limpieza al recargar si está logueado
   useEffect(() => {
