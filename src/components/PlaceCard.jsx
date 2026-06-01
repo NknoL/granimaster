@@ -70,6 +70,17 @@ export default function PlaceCard({ place, count, hasVoted, onVote }) {
         }
       `}
     >
+      
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: "url('/avatar.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+      
       {/* ── Nombre + check ── */}
       <div className="flex items-start justify-between gap-2">
         <span className={`font-semibold text-base leading-tight ${isVotedHere ? 'text-red-300' : 'text-white'}`}>
