@@ -3,12 +3,12 @@ import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
 import PlaceCard from '../components/PlaceCard'
 import CityTabs from '../components/CityTabs'
-import { motion, AnimatePresence } from 'framer-motion'
+import { LogOut, User } from 'lucide-react'
 
 const PLACES = {
-  Bucaramanga: [ /* ... tus lugares ... */ ],
-  Girón: [ /* ... */ ],
-  Floridablanca: [ /* ... */ ]
+  Bucaramanga: [ /* tus lugares */ ],
+  Girón: [ /* tus lugares */ ],
+  Floridablanca: [ /* tus lugares */ ]
 }
 
 const CONCURSO_FINALIZADO = false
@@ -24,9 +24,7 @@ export default function VotingPage() {
 
   // Obtener usuario actual
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data?.user ?? null)
-    })
+    supabase.auth.getUser().then(({ data }) => setUser(data?.user ?? null))
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
@@ -55,14 +53,19 @@ export default function VotingPage() {
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
+      options: { redirectTo: window.location.origin }
     })
-    if (error) toast.error('Error al iniciar sesión con Google')
+    if (error) toast.error('Error al iniciar sesión')
   }
 
-  const handleVoteClick = (place) => {
+  // Cerrar sesión
+  const signOut = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    toast.success('Sesión cerrada')
+  }
+
+  const handleVoteClick = async (place) => {
     if (!user) {
       setSelectedPlace(place)
       setShowLoginModal(true)
@@ -74,16 +77,12 @@ export default function VotingPage() {
       return
     }
 
-    // Si ya está logueado, votar directamente
-    submitVote(place)
+    await submitVote(place)
   }
 
   const submitVote = async (place) => {
-    if (!user) return
-
     setIsSubmitting(true)
 
-    // Verificar si ya votó con esta cuenta en esta ciudad
     const { data: existing } = await supabase
       .from('votes')
       .select('id')
@@ -99,7 +98,7 @@ export default function VotingPage() {
 
     const { error } = await supabase.from('votes').insert({
       city: activeCity,
-      place: place,
+      place,
       user_id: user.id
     })
 
@@ -115,6 +114,7 @@ export default function VotingPage() {
 
     toast.success('¡Voto registrado con éxito!')
     setIsSubmitting(false)
+    setShowLoginModal(false)
     fetchCounts()
   }
 
@@ -122,11 +122,22 @@ export default function VotingPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
-      <div className="text-center mb-10">
-        <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium tracking-[3px] mb-4">
-          CONCURSO 2026
+      {/* Header con usuario */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <div className="text-xs tracking-[3px] text-cyan-400">CONCURSO 2026</div>
+          <h1 className="text-5xl font-bold tracking-tighter">Elige el mejor granizado</h1>
         </div>
-        <h1 className="text-6xl md:text-7xl font-bold tracking-tighter">Elige el mejor granizado</h1>
+
+        {user && (
+          <div className="flex items-center gap-3 bg-zinc-900 px-4 py-2 rounded-2xl border border-zinc-800">
+            <User size={18} className="text-[#D4AF77]" />
+            <span className="text-sm text-zinc-300">{user.email}</span>
+            <button onClick={signOut} className="ml-2 text-zinc-400 hover:text-red-400 transition">
+              <LogOut size={18} />
+            </button>
+          </div>
+        )}
       </div>
 
       {!CONCURSO_FINALIZADO && <CityTabs active={activeCity} onChange={setActiveCity} />}
@@ -144,35 +155,25 @@ export default function VotingPage() {
       </div>
 
       {/* Modal de Login con Google */}
-      <AnimatePresence>
-        {showLoginModal && (
-          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 w-full max-w-md text-center"
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 w-full max-w-md text-center">
+            <h3 className="text-2xl font-bold mb-2">Iniciar sesión para votar</h3>
+            <p className="text-zinc-400 mb-6">Usa tu cuenta de Google para participar</p>
+
+            <button
+              onClick={signInWithGoogle}
+              className="w-full py-3.5 rounded-2xl bg-white text-black font-semibold flex items-center justify-center gap-3 hover:bg-zinc-200 transition"
             >
-              <h3 className="text-2xl font-bold mb-2">Iniciar sesión</h3>
-              <p className="text-zinc-400 mb-6">Necesitas iniciar sesión con Google para votar</p>
+              Continuar con Google
+            </button>
 
-              <button
-                onClick={signInWithGoogle}
-                className="w-full py-3.5 rounded-2xl bg-white text-black font-semibold flex items-center justify-center gap-3 hover:bg-zinc-200 transition"
-              >
-                Continuar con Google
-              </button>
-
-              <button
-                onClick={() => setShowLoginModal(false)}
-                className="mt-4 text-sm text-zinc-400 hover:text-white"
-              >
-                Cancelar
-              </button>
-            </motion.div>
+            <button onClick={() => setShowLoginModal(false)} className="mt-4 text-sm text-zinc-400">
+              Cancelar
+            </button>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   )
 }
