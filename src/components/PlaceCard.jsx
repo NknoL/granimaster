@@ -1,6 +1,6 @@
 import { Check, Instagram } from 'lucide-react'
 
-export default function PlaceCard({ place, instagram, count, hasVoted, onVote, image }) {
+export default function PlaceCard({ place, instagram, hasVoted, onVote }) {
   const votedThis = hasVoted === place
 
   const openInstagram = () => {
@@ -16,25 +16,18 @@ export default function PlaceCard({ place, instagram, count, hasVoted, onVote, i
         : 'border-zinc-800 hover:border-zinc-700 bg-zinc-900/50'
     }`}>
       
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="font-semibold text-lg tracking-tight">{place}</div>
-          
-          {instagram && (
-            <button 
-              onClick={openInstagram}
-              className="flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 text-sm mt-1 transition"
-            >
-              <Instagram size={15} />
-              <span>{instagram}</span>
-            </button>
-          )}
-        </div>
-
-        <div className="text-right">
-          <div className="text-3xl font-mono font-semibold text-cyan-400 tabular-nums">{count}</div>
-          <div className="text-[10px] text-zinc-500 -mt-1">votos</div>
-        </div>
+      <div>
+        <div className="font-semibold text-lg tracking-tight">{place}</div>
+        
+        {instagram && (
+          <button 
+            onClick={openInstagram}
+            className="flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 text-sm mt-1 transition"
+          >
+            <Instagram size={15} />
+            <span>{instagram}</span>
+          </button>
+        )}
       </div>
 
       <button
