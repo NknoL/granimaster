@@ -20,19 +20,26 @@ function App() {
               </div>
             </Link>
 
-            {/* Solo botón de Votar (Dashboard queda oculto) */}
-            <Link 
-              to="/" 
-              className="px-5 py-2 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 transition text-sm"
-            >
-              Votar
-            </Link>
+            <div className="flex items-center gap-2 text-sm">
+              <Link 
+                to="/" 
+                className="px-4 py-2 rounded-xl hover:bg-zinc-900 transition"
+              >
+                Votar
+              </Link>
+              <Link 
+                to="/supervisor" 
+                className="px-5 py-2 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 transition flex items-center gap-2 text-sm"
+              >
+                Supervisor
+              </Link>
+            </div>
           </div>
         </nav>
 
         <Routes>
           <Route path="/" element={<VotingPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/supervisor" element={<AdminDashboard />} />
         </Routes>
       </div>
 

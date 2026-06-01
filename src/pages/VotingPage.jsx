@@ -39,10 +39,15 @@ const PLACES = {
   ]
 }
 
+const MOSTRAR_CONTEOS = false
+
 export default function VotingPage() {
   const [activeCity, setActiveCity] = useState('Bucaramanga')
   const [counts, setCounts] = useState({})
   const [voted, setVoted] = useState({})
+  const [showCedulaModal, setShowCedulaModal] = useState(false)
+  const [cedulaInput, setCedulaInput] = useState('')
+  const [selectedPlace, setSelectedPlace] = useState(null)
 
   const fetchCounts = async () => {
     const { data, error } = await supabase
@@ -71,33 +76,65 @@ export default function VotingPage() {
     }
   }, [])
 
-  const handleVote = async (city, place) => {
-    if (voted[city]) {
-      toast.error(`Ya votaste en ${city}`, {
+  // Abrir modal para pedir cédula
+  const handleVoteClick = (place) => {
+    if (voted[activeCity]) {
+      toast.error(`Ya votaste en ${activeCity}`, {
         description: 'Solo puedes votar una vez por ciudad.'
       })
       return
     }
+    setSelectedPlace(place)
+    setCedulaInput('')
+    setShowCedulaModal(true)
+  }
 
-    const { error } = await supabase
-      .from('votes')
-      .insert({ city, place })
-
-    if (error) {
-      toast.error('Error al registrar el voto', {
-        description: 'Intenta de nuevo en unos segundos.'
-      })
+  // Registrar voto con cédula
+  const submitVoteWithCedula = async () => {
+    if (!cedulaInput.trim()) {
+      toast.error('Por favor ingresa tu número de cédula')
       return
     }
 
-    const newVoted = { ...voted, [city]: place }
+    // Verificar si ya votó con esa cédula en esta ciudad
+    const { data: existingVote } = await supabase
+      .from('votes')
+      .select('id')
+      .eq('city', activeCity)
+      .eq('cedula', cedulaInput.trim())
+      .maybeSingle()
+
+    if (existingVote) {
+      toast.error('Ya votaste con esta cédula en esta ciudad')
+      setShowCedulaModal(false)
+      return
+    }
+
+    // Registrar el voto
+    const { error } = await supabase
+      .from('votes')
+      .insert({
+        city: activeCity,
+        place: selectedPlace,
+        cedula: cedulaInput.trim()
+      })
+
+    if (error) {
+      toast.error('Error al registrar el voto')
+      return
+    }
+
+    // Marcar como votado en este navegador
+    const newVoted = { ...voted, [activeCity]: selectedPlace }
     setVoted(newVoted)
     localStorage.setItem('granimaster_voted', JSON.stringify(newVoted))
 
-    toast.success(`¡Voto registrado!`, {
-      description: `${place} en ${city}`
+    toast.success('¡Voto registrado correctamente!', {
+      description: `${selectedPlace} en ${activeCity}`
     })
 
+    setShowCedulaModal(false)
+    setCedulaInput('')
     fetchCounts()
   }
 
@@ -126,17 +163,61 @@ export default function VotingPage() {
             key={placeObj.name}
             place={placeObj.name}
             instagram={placeObj.instagram}
-            count={cityCounts[placeObj.name] || 0}
+            count={MOSTRAR_CONTEOS ? (cityCounts[placeObj.name] || 0) : 0}
             hasVoted={voted[activeCity]}
-            onVote={() => handleVote(activeCity, placeObj.name)}
-            // image={}   ← aquí después pones la foto cuando me la des
+            onVote={() => handleVoteClick(placeObj.name)}
           />
         ))}
       </div>
 
+      {/* Modal para pedir Cédula */}
+      {showCedulaModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 w-full max-w-md mx-4">
+            <h3 className="text-2xl font-bold mb-2">Verificación de identidad</h3>
+            <p className="text-zinc-400 mb-6">
+              Ingresa tu número de cédula para registrar tu voto en <strong>{activeCity}</strong>
+            </p>
+
+            <input
+              type="text"
+              value={cedulaInput}
+              onChange={(e) => setCedulaInput(e.target.value)}
+              placeholder="Número de cédula"
+              className="w-full bg-black border border-zinc-700 focus:border-cyan-500 rounded-2xl px-5 py-4 text-xl tracking-widest text-center outline-none mb-6"
+              onKeyDown={(e) => e.key === 'Enter' && submitVoteWithCedula()}
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowCedulaModal(false)
+                  setCedulaInput('')
+                }}
+                className="flex-1 py-3 rounded-2xl border border-zinc-700 hover:bg-zinc-800 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={submitVoteWithCedula}
+                className="flex-1 py-3 rounded-2xl bg-white text-black font-semibold hover:bg-cyan-400 transition"
+              >
+                Confirmar Voto
+              </button>
+            </div>
+
+            <p className="text-center text-[10px] text-zinc-500 mt-4">
+              Tu cédula solo se usa para evitar votos duplicados.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="mt-12 text-center">
         <p className="text-xs text-zinc-500">
-          Los resultados se actualizan en tiempo real • Tus votos se guardan en este navegador
+          {MOSTRAR_CONTEOS 
+            ? "Los resultados se actualizan en tiempo real" 
+            : "Los conteos se mostrarán cuando termine el concurso"}
         </p>
       </div>
     </div>
