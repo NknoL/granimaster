@@ -27,12 +27,6 @@ function App() {
             </Link>
 
             {/* Solo botón de Votar (Supervisor oculto del público) */}
-            <Link 
-              to="/" 
-              className="px-5 py-2 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 transition text-sm"
-            >
-              Votar
-            </Link>
           </div>
         </nav>
 

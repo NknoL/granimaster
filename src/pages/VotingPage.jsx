@@ -207,9 +207,6 @@ export default function VotingPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <div className="text-center mb-10">
-        <div className="inline-block px-4 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium tracking-[3px] mb-4">
-          CONCURSO 2026
-        </div>
         <h1 className="text-6xl md:text-7xl font-bold tracking-tighter">Elige el mejor granizado</h1>
       </div>
 
