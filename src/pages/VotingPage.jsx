@@ -26,7 +26,6 @@ export default function VotingPage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Cargar votos del usuario actual
   const loadUserVotes = async (currentUser) => {
     if (!currentUser) {
       setVoted({})
@@ -52,10 +51,8 @@ export default function VotingPage() {
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       setUser(currentUser)
 
-      // Cargar votos del usuario
       await loadUserVotes(currentUser)
 
-      // Cargar conteos globales
       const { data: allVotes } = await supabase.from('votes').select('city, place')
       const grouped = {}
       allVotes?.forEach(vote => {
@@ -69,7 +66,6 @@ export default function VotingPage() {
 
     init()
 
-    // Escuchar cambios de login/logout
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         const currentUser = session?.user || null
@@ -81,7 +77,6 @@ export default function VotingPage() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Lógica de 5 segundos de carga lenta
   useEffect(() => {
     let timer
     if (loading) {
@@ -118,10 +113,9 @@ export default function VotingPage() {
       return
     }
 
-    if (voted[city]) {
-      toast.error(`Ya votaste en ${city}`)
-      return
-    }
+    // ✅ FIX #1: Si ya votó en esta ciudad, no hacer nada silenciosamente
+    // Los botones ya quedan deshabilitados visualmente desde PlaceCard
+    if (voted[city]) return
 
     const { error } = await supabase.from('votes').insert({
       city,
@@ -132,7 +126,8 @@ export default function VotingPage() {
 
     if (error) {
       if (error.code === '23505') {
-        toast.error(`Ya votaste en ${city}`)
+        // Voto duplicado detectado por la BD — actualizar estado local
+        await loadUserVotes(user)
       } else {
         toast.error('Error al registrar el voto')
       }
@@ -142,7 +137,6 @@ export default function VotingPage() {
     setVoted(prev => ({ ...prev, [city]: place }))
     toast.success('¡Voto registrado!', { description: `${place} en ${city}` })
 
-    // Actualizar conteos localmente
     setCounts(prev => {
       const newCounts = { ...prev }
       if (!newCounts[city]) newCounts[city] = {}

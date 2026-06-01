@@ -9,6 +9,7 @@ export default function AdminDashboard() {
   const [votes, setVotes] = useState([])
   const [lastUpdated, setLastUpdated] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'Grm2026xK9pL'
 
@@ -20,16 +21,33 @@ export default function AdminDashboard() {
 
   const loadVotes = async () => {
     setLoading(true)
-    const { data } = await supabase.from('votes').select('*').order('created_at', { ascending: false })
+    setError(null)
+
+    const { data, error: fetchError } = await supabase
+      .from('votes')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    // ✅ FIX #2: Mostrar error real para diagnosticar problemas de RLS
+    if (fetchError) {
+      console.error('Error cargando votos:', fetchError)
+      setError(`Error: ${fetchError.message} (código: ${fetchError.code})`)
+    }
+
     if (data) {
       setVotes(data)
       setLastUpdated(new Date())
     }
+
     setLoading(false)
   }
 
   useEffect(() => {
     if (!isAuthed) return
+
+    // ✅ FIX #2: Carga inmediata al autenticarse (no esperar 15s)
+    loadVotes()
+
     const interval = setInterval(loadVotes, 15000)
     return () => clearInterval(interval)
   }, [isAuthed])
@@ -37,7 +55,7 @@ export default function AdminDashboard() {
   const handleLogin = () => {
     if (pin.trim() === ADMIN_PIN) {
       setIsAuthed(true)
-      loadVotes()
+      // loadVotes() ya se llama en el useEffect al cambiar isAuthed
     } else {
       alert('PIN incorrecto')
     }
@@ -63,7 +81,6 @@ export default function AdminDashboard() {
     link.click()
   }
 
-  // Cálculos
   const cityTotals = {}
   const placeTotals = {}
   const uniqueEmails = new Set()
@@ -77,7 +94,6 @@ export default function AdminDashboard() {
   const totalVotes = votes.length
   const uniqueVoters = uniqueEmails.size
   const cityChartData = Object.entries(cityTotals).map(([ciudad, votos]) => ({ ciudad, votos }))
-
   const top3General = Object.entries(placeTotals).sort((a, b) => b[1] - a[1]).slice(0, 3)
 
   const getTop3ByCity = (city) => {
@@ -121,14 +137,23 @@ export default function AdminDashboard() {
           {lastUpdated && <p className="text-xs text-zinc-500 mt-1">Actualizado: {lastUpdated.toLocaleTimeString('es-CO')}</p>}
         </div>
         <div className="flex gap-3">
-          <button onClick={loadVotes} className="flex items-center gap-2 px-5 py-3 bg-zinc-900 rounded-2xl border border-zinc-700 text-sm">
-            <RefreshCw size={16} /> Actualizar
+          <button onClick={loadVotes} disabled={loading} className="flex items-center gap-2 px-5 py-3 bg-zinc-900 rounded-2xl border border-zinc-700 text-sm disabled:opacity-50">
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Actualizar
           </button>
           <button onClick={exportToCSV} className="flex items-center gap-2 px-6 py-3 bg-white text-black font-semibold rounded-2xl text-sm">
             <Download size={18} /> Exportar CSV
           </button>
         </div>
       </div>
+
+      {/* ✅ FIX #2: Mostrar error de Supabase si ocurre */}
+      {error && (
+        <div className="mb-6 bg-red-950 border border-red-800 rounded-2xl px-5 py-4 text-red-400 text-sm">
+          <strong>Error al cargar datos:</strong> {error}
+          <br />
+          <span className="text-red-500 text-xs">Revisa las políticas RLS en Supabase → tabla "votes" → Policies</span>
+        </div>
+      )}
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -153,13 +178,15 @@ export default function AdminDashboard() {
           <h3 className="font-semibold text-xl">Top 3 General</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {top3General.map(([place, votos], i) => (
+          {top3General.length > 0 ? top3General.map(([place, votos], i) => (
             <div key={i} className="bg-zinc-950 rounded-2xl p-5 text-center">
               <div className="text-3xl mb-1">{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}</div>
               <div className="font-semibold">{place}</div>
               <div className="text-4xl font-mono text-cyan-400 mt-1">{votos}</div>
             </div>
-          ))}
+          )) : (
+            <div className="col-span-3 text-center text-zinc-500 py-6">Sin votos aún</div>
+          )}
         </div>
       </div>
 
@@ -230,7 +257,9 @@ export default function AdminDashboard() {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan="4" className="py-8 text-center text-zinc-400">No hay votos registrados</td></tr>
+                <tr><td colSpan="4" className="py-8 text-center text-zinc-400">
+                  {loading ? 'Cargando...' : 'No hay votos registrados'}
+                </td></tr>
               )}
             </tbody>
           </table>
