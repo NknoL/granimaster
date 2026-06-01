@@ -37,6 +37,7 @@ export default function PlaceCard({ place, count, hasVoted, onVote }) {
         {isVotedThis ? '✓ Votaste aquí' : cityAlreadyVoted ? 'Ya votaste en esta ciudad' : 'Votar'}
       </button>
     </div>
+    
   )
-  
+
 }

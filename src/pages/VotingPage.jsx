@@ -199,6 +199,7 @@ export default function VotingPage() {
         </div>
       )}
     </div>
+    
   )
-  
+
 }
