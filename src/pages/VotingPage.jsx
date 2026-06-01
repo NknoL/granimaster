@@ -195,7 +195,7 @@ export default function VotingPage() {
             Elige el mejor granizado
           </h1>
           <p className="text-zinc-400 mt-3 text-base">
-            Inicia sesión con Google para votar - ¡¡ 1 voto por cada ciudad !!
+            Inicia sesión con Google para votar - ¡¡Puedes hacer 1 voto por cada ciudad!!
           </p>
 
           {/* Instagram */}
