@@ -8,7 +8,7 @@ import { LogIn, LogOut, Instagram } from 'lucide-react'
 
 const PLACES = {
   Bucaramanga: [
-    "Granifreseo", "Mundo8ice", "Frozen Shark", "Trinislush", "Granibucaros",
+    "Mundo8ice", "Frozen Shark", "Trinislush", "Granibucaros",
     "Crack granizados", "Tamy ice", "420Slushy", "Mafia cocktails", "Necati cocktails",
     "Granilocos", "Eclipse cocktail", "Blueice", "Ice flow", "Nova ice"
   ],
@@ -16,7 +16,7 @@ const PLACES = {
     "Graniizu ice", "Luna yena", "Urban slush", "Exotic slush", "Cool hot"
   ],
   Floridablanca: [
-    "Refreshment station", "Granifreseo", "Crazy Drinks", "Portal granizados", "Spacebuddies", "Mafia"
+    "Refreshment station", "Crazy Drinks", "Portal granizados", "Spacebuddies", "Mafia"
   ]
 }
 
