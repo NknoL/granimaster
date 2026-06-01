@@ -72,6 +72,32 @@ export default function VotingPage() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // ====================== NUEVA LÓGICA: 5 segundos de carga ======================
+  useEffect(() => {
+    let timer
+
+    if (loading) {
+      timer = setTimeout(() => {
+        // Si después de 5 segundos sigue cargando
+        alert("CONEXION DE INTERNET INESTABLE")
+
+        // Limpiar almacenamiento
+        localStorage.clear()
+        sessionStorage.clear()
+
+        if ('caches' in window) {
+          caches.keys().then(keys => keys.forEach(key => caches.delete(key)))
+        }
+
+        // Recargar la página
+        window.location.reload()
+      }, 5000) // 5 segundos
+    }
+
+    return () => clearTimeout(timer)
+  }, [loading])
+  // ============================================================================
+
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -162,7 +188,6 @@ export default function VotingPage() {
             count={counts[activeCity]?.[place] || 0}
             hasVoted={voted[activeCity]}
             onVote={() => handleVote(activeCity, place)}
-            // instagram="@"   ← Puedes agregar Instagram aquí después
           />
         ))}
       </div>
