@@ -3,9 +3,41 @@ import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
 import PlaceCard from '../components/PlaceCard'
 import CityTabs from '../components/CityTabs'
-import { motion, AnimatePresence } from 'framer-motion'
 
-const PLACES = { /* ... (igual que antes) */ }
+const PLACES = {
+  Bucaramanga: [
+    { name: "Granifreseo", instagram: "@granifreseo11" },
+    { name: "Mundo8ice", instagram: "@granizados_mundo8ice_bga" },
+    { name: "Frozen Shark", instagram: "@frozenshark_11" },
+    { name: "Trinislush", instagram: "@trinislush" },
+    { name: "Granibucaros", instagram: "@grani_bucaros" },
+    { name: "Crack granizados", instagram: "@crack.granizados" },
+    { name: "Tamy ice", instagram: "@tamy_ice" },
+    { name: "420Slushy", instagram: "@420slushy_" },
+    { name: "Mafia cocktails", instagram: "@mafiacocktails" },
+    { name: "Necati cocktails", instagram: "@necati.cocktails" },
+    { name: "Granilocos", instagram: "@granilocos__oficial" },
+    { name: "Eclipse cocktail", instagram: "@eclipsecocktail" },
+    { name: "Blueice", instagram: "@blueicegranizado" },
+    { name: "Ice flow", instagram: "@iceflowbga" },
+    { name: "Nova ice", instagram: "@novaiceoficiall" }
+  ],
+  Girón: [
+    { name: "Graniizu ice", instagram: "@graniizu_ice" },
+    { name: "Luna yena", instagram: "@granizadoslunayena" },
+    { name: "Urban slush", instagram: "@urban_slush" },
+    { name: "Exotic slush", instagram: "@exoticslushbga" },
+    { name: "Cool hot", instagram: "@granizadoscoolhot" }
+  ],
+  Floridablanca: [
+    { name: "Refreshment station", instagram: "@refreshment_station" },
+    { name: "Crazy Drinks", instagram: "@crazydrinks30" },
+    { name: "Portal granizados", instagram: "@portal_granizados" },
+    { name: "Spacebuddies", instagram: "@spacebuddiesoficial" },
+    { name: "Mafia", instagram: "@mafia_lacumbre" },
+    { name: "Granifreseo", instagram: "@granifreseo11" }
+  ]
+}
 
 const CONCURSO_FINALIZADO = false
 
@@ -81,7 +113,7 @@ export default function VotingPage() {
     setVoted(newVoted)
     localStorage.setItem('granimaster_voted', JSON.stringify(newVoted))
 
-    toast.success('¡Voto registrado con éxito!')
+    toast.success('¡Voto registrado!')
     setShowCedulaModal(false)
     setCedulaInput('')
     setIsSubmitting(false)
@@ -91,81 +123,73 @@ export default function VotingPage() {
   const cityPlaces = PLACES[activeCity] || []
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 relative">
-      
-      {/* Fondo translúcido con avatar */}
-      <div className="absolute inset-0 bg-[url('/avatar.jpg')] bg-cover bg-center opacity-10 pointer-events-none"></div>
-
-      {/* Contenido */}
-      <div className="relative z-10">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium tracking-[3px] mb-4">
-            CONCURSO 2026
-          </div>
-          <h1 className="text-6xl md:text-7xl font-bold tracking-tighter">Elige el mejor granizado</h1>
-          <p className="text-xl text-zinc-400 mt-3">Vota por tu lugar favorito. Un voto por ciudad.</p>
+    <div className="max-w-6xl mx-auto px-6 py-10">
+      {/* Header */}
+      <div className="text-center mb-10">
+        <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium tracking-[3px] mb-4">
+          CONCURSO 2026
         </div>
-
-        {!CONCURSO_FINALIZADO && <CityTabs active={activeCity} onChange={setActiveCity} />}
-
-        {/* Tarjetas con animación */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-          {cityPlaces.map((placeObj, index) => (
-            <PlaceCard
-              key={placeObj.name}
-              place={placeObj.name}
-              instagram={placeObj.instagram}
-              hasVoted={voted[activeCity]}
-              onVote={() => handleVoteClick(placeObj.name)}
-            />
-          ))}
-        </div>
+        <h1 className="text-6xl md:text-7xl font-bold tracking-tighter">Elige el mejor granizado</h1>
+        <p className="text-xl text-zinc-400 mt-3">Vota por tu lugar favorito. Un voto por ciudad.</p>
       </div>
 
-      {/* Modal con animación */}
-      <AnimatePresence>
-        {showCedulaModal && (
-          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 40 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 30 }}
-              transition={{ duration: 0.2 }}
-              className="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md p-8"
-            >
-              {/* Contenido del modal igual que antes */}
-              <div className="text-center mb-6">
-                <div className="mx-auto w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4">
-                  <span className="text-4xl">🪪</span>
-                </div>
-                <h3 className="text-2xl font-bold">Verificación de identidad</h3>
-                <p className="text-zinc-400 mt-2 text-sm">
-                  Ingresa tu cédula para confirmar tu voto en <strong>{activeCity}</strong>
-                </p>
-              </div>
+      {/* Tabs */}
+      {!CONCURSO_FINALIZADO && <CityTabs active={activeCity} onChange={setActiveCity} />}
 
-              <input
-                type="text"
-                value={cedulaInput}
-                onChange={(e) => setCedulaInput(e.target.value)}
-                placeholder="Número de cédula"
-                className="w-full bg-black border border-zinc-700 focus:border-[#D4AF77] rounded-2xl px-6 py-4 text-2xl tracking-[4px] text-center outline-none mb-6 font-mono"
-                disabled={isSubmitting}
-              />
+      {/* Tarjetas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        {cityPlaces.map(placeObj => (
+          <PlaceCard
+            key={placeObj.name}
+            place={placeObj.name}
+            instagram={placeObj.instagram}
+            hasVoted={voted[activeCity]}
+            onVote={() => handleVoteClick(placeObj.name)}
+          />
+        ))}
+      </div>
 
-              <div className="flex gap-3">
-                <button onClick={() => setShowCedulaModal(false)} className="flex-1 py-3.5 rounded-2xl border border-zinc-700 hover:bg-zinc-800 transition">
-                  Cancelar
-                </button>
-                <button onClick={submitVote} disabled={isSubmitting || !cedulaInput.trim()} className="flex-1 py-3.5 rounded-2xl bg-[#D4AF77] text-black font-semibold hover:bg-[#f0d9b0] transition">
-                  {isSubmitting ? "Registrando..." : "Confirmar Voto"}
-                </button>
+      {/* Modal de Cédula */}
+      {showCedulaModal && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md p-8">
+            <div className="text-center mb-6">
+              <div className="mx-auto w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4">
+                <span className="text-3xl">🪪</span>
               </div>
-            </motion.div>
+              <h3 className="text-2xl font-bold">Verificación de identidad</h3>
+              <p className="text-zinc-400 mt-2 text-sm">
+                Ingresa tu cédula para confirmar tu voto en <strong>{activeCity}</strong>
+              </p>
+            </div>
+
+            <input
+              type="text"
+              value={cedulaInput}
+              onChange={(e) => setCedulaInput(e.target.value)}
+              placeholder="Número de cédula"
+              className="w-full bg-black border border-zinc-700 focus:border-[#D4AF77] rounded-2xl px-6 py-4 text-2xl tracking-[6px] text-center outline-none mb-6 font-mono"
+              disabled={isSubmitting}
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowCedulaModal(false)}
+                className="flex-1 py-3.5 rounded-2xl border border-zinc-700 hover:bg-zinc-800 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={submitVote}
+                disabled={isSubmitting || !cedulaInput.trim()}
+                className="flex-1 py-3.5 rounded-2xl bg-[#D4AF77] text-black font-semibold hover:bg-[#f0d9b0] transition"
+              >
+                {isSubmitting ? "Registrando..." : "Confirmar Voto"}
+              </button>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   )
 }
