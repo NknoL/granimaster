@@ -38,4 +38,5 @@ export default function PlaceCard({ place, count, hasVoted, onVote }) {
       </button>
     </div>
   )
+  
 }
