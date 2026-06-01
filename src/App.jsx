@@ -10,9 +10,15 @@ function App() {
         {/* Navbar - Solo botón de Votar (Supervisor oculto) */}
         <nav className="border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-md sticky top-0 z-50">
           <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-2xl flex items-center justify-center">
-                <span className="font-bold text-xl text-black">G</span>
+              {/* Logo cambiado por imagen */}
+              <div className="w-9 h-9 rounded-2xl overflow-hidden border border-zinc-700">
+                <img 
+                  src="/avatar.jpg" 
+                  alt="Granimaster" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
                 <div className="font-semibold tracking-tight text-lg">Granimaster 2026</div>
