@@ -50,32 +50,34 @@ export default function VotingPage() {
   const [selectedPlace, setSelectedPlace] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Usuario actual
+  // Obtener usuario actual
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data?.user ?? null))
+
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
+
     return () => listener.subscription.unsubscribe()
   }, [])
-
-  const fetchCounts = async () => {
-    // (Opcional) Puedes dejarlo vacío si no necesitas conteos en tiempo real por ahora
-  }
 
   useEffect(() => {
     const saved = localStorage.getItem('granimaster_voted')
     if (saved) setVoted(JSON.parse(saved))
   }, [])
 
+  // Login con Google (CORREGIDO)
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin }
+      options: {
+        redirectTo: `${window.location.origin}/`
+      }
     })
     if (error) toast.error('Error al iniciar sesión con Google')
   }
 
+  // Cerrar sesión
   const signOut = async () => {
     await supabase.auth.signOut()
     setUser(null)
@@ -88,10 +90,12 @@ export default function VotingPage() {
       setShowLoginModal(true)
       return
     }
+
     if (voted[activeCity]) {
       toast.error(`Ya votaste en ${activeCity}`)
       return
     }
+
     submitVote(place)
   }
 
@@ -147,7 +151,7 @@ export default function VotingPage() {
           <div className="flex items-center gap-3 bg-zinc-900 px-4 py-2 rounded-2xl border border-zinc-800 text-sm">
             <User size={18} className="text-[#D4AF77]" />
             <span className="text-zinc-300">{user.email}</span>
-            <button onClick={signOut} className="text-zinc-400 hover:text-red-400 ml-2">
+            <button onClick={signOut} className="ml-2 text-zinc-400 hover:text-red-400">
               <LogOut size={18} />
             </button>
           </div>
@@ -169,12 +173,12 @@ export default function VotingPage() {
         ))}
       </div>
 
-      {/* Modal Login Google */}
+      {/* Modal Login con Google */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
           <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 w-full max-w-md text-center">
             <h3 className="text-2xl font-bold mb-2">Iniciar sesión para votar</h3>
-            <p className="text-zinc-400 mb-6">Usa tu cuenta de Google</p>
+            <p className="text-zinc-400 mb-6">Usa tu cuenta de Google para participar</p>
 
             <button
               onClick={signInWithGoogle}
