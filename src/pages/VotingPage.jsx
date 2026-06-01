@@ -3,81 +3,96 @@ import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
 import PlaceCard from '../components/PlaceCard'
 import CityTabs from '../components/CityTabs'
-import { LogOut, User } from 'lucide-react'
+import { User, LogOut } from 'lucide-react'
 
 const PLACES = {
-  Bucaramanga: [ /* tus lugares */ ],
-  Girón: [ /* tus lugares */ ],
-  Floridablanca: [ /* tus lugares */ ]
+  Bucaramanga: [
+    { name: "Granifreseo", instagram: "@granifreseo11" },
+    { name: "Mundo8ice", instagram: "@granizados_mundo8ice_bga" },
+    { name: "Frozen Shark", instagram: "@frozenshark_11" },
+    { name: "Trinislush", instagram: "@trinislush" },
+    { name: "Granibucaros", instagram: "@grani_bucaros" },
+    { name: "Crack granizados", instagram: "@crack.granizados" },
+    { name: "Tamy ice", instagram: "@tamy_ice" },
+    { name: "420Slushy", instagram: "@420slushy_" },
+    { name: "Mafia cocktails", instagram: "@mafiacocktails" },
+    { name: "Necati cocktails", instagram: "@necati.cocktails" },
+    { name: "Granilocos", instagram: "@granilocos__oficial" },
+    { name: "Eclipse cocktail", instagram: "@eclipsecocktail" },
+    { name: "Blueice", instagram: "@blueicegranizado" },
+    { name: "Ice flow", instagram: "@iceflowbga" },
+    { name: "Nova ice", instagram: "@novaiceoficiall" }
+  ],
+  Girón: [
+    { name: "Graniizu ice", instagram: "@graniizu_ice" },
+    { name: "Luna yena", instagram: "@granizadoslunayena" },
+    { name: "Urban slush", instagram: "@urban_slush" },
+    { name: "Exotic slush", instagram: "@exoticslushbga" },
+    { name: "Cool hot", instagram: "@granizadoscoolhot" }
+  ],
+  Floridablanca: [
+    { name: "Refreshment station", instagram: "@refreshment_station" },
+    { name: "Crazy Drinks", instagram: "@crazydrinks30" },
+    { name: "Portal granizados", instagram: "@portal_granizados" },
+    { name: "Spacebuddies", instagram: "@spacebuddiesoficial" },
+    { name: "Mafia", instagram: "@mafia_lacumbre" },
+    { name: "Granifreseo", instagram: "@granifreseo11" }
+  ]
 }
 
 const CONCURSO_FINALIZADO = false
 
 export default function VotingPage() {
   const [activeCity, setActiveCity] = useState('Bucaramanga')
-  const [counts, setCounts] = useState({})
   const [voted, setVoted] = useState({})
   const [user, setUser] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [selectedPlace, setSelectedPlace] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Obtener usuario actual
+  // Usuario actual
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data?.user ?? null))
-
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
-
     return () => listener.subscription.unsubscribe()
   }, [])
 
   const fetchCounts = async () => {
-    const { data } = await supabase.from('votes').select('city, place')
-    const grouped = {}
-    data?.forEach(vote => {
-      if (!grouped[vote.city]) grouped[vote.city] = {}
-      grouped[vote.city][vote.place] = (grouped[vote.city][vote.place] || 0) + 1
-    })
-    setCounts(grouped)
+    // (Opcional) Puedes dejarlo vacío si no necesitas conteos en tiempo real por ahora
   }
 
   useEffect(() => {
-    fetchCounts()
     const saved = localStorage.getItem('granimaster_voted')
     if (saved) setVoted(JSON.parse(saved))
   }, [])
 
-  // Login con Google
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin }
     })
-    if (error) toast.error('Error al iniciar sesión')
+    if (error) toast.error('Error al iniciar sesión con Google')
   }
 
-  // Cerrar sesión
   const signOut = async () => {
     await supabase.auth.signOut()
     setUser(null)
     toast.success('Sesión cerrada')
   }
 
-  const handleVoteClick = async (place) => {
+  const handleVoteClick = (place) => {
     if (!user) {
       setSelectedPlace(place)
       setShowLoginModal(true)
       return
     }
-
     if (voted[activeCity]) {
       toast.error(`Ya votaste en ${activeCity}`)
       return
     }
-
-    await submitVote(place)
+    submitVote(place)
   }
 
   const submitVote = async (place) => {
@@ -98,7 +113,7 @@ export default function VotingPage() {
 
     const { error } = await supabase.from('votes').insert({
       city: activeCity,
-      place,
+      place: place,
       user_id: user.id
     })
 
@@ -115,14 +130,13 @@ export default function VotingPage() {
     toast.success('¡Voto registrado con éxito!')
     setIsSubmitting(false)
     setShowLoginModal(false)
-    fetchCounts()
   }
 
   const cityPlaces = PLACES[activeCity] || []
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
-      {/* Header con usuario */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <div className="text-xs tracking-[3px] text-cyan-400">CONCURSO 2026</div>
@@ -130,10 +144,10 @@ export default function VotingPage() {
         </div>
 
         {user && (
-          <div className="flex items-center gap-3 bg-zinc-900 px-4 py-2 rounded-2xl border border-zinc-800">
+          <div className="flex items-center gap-3 bg-zinc-900 px-4 py-2 rounded-2xl border border-zinc-800 text-sm">
             <User size={18} className="text-[#D4AF77]" />
-            <span className="text-sm text-zinc-300">{user.email}</span>
-            <button onClick={signOut} className="ml-2 text-zinc-400 hover:text-red-400 transition">
+            <span className="text-zinc-300">{user.email}</span>
+            <button onClick={signOut} className="text-zinc-400 hover:text-red-400 ml-2">
               <LogOut size={18} />
             </button>
           </div>
@@ -142,6 +156,7 @@ export default function VotingPage() {
 
       {!CONCURSO_FINALIZADO && <CityTabs active={activeCity} onChange={setActiveCity} />}
 
+      {/* Tarjetas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         {cityPlaces.map(placeObj => (
           <PlaceCard
@@ -154,12 +169,12 @@ export default function VotingPage() {
         ))}
       </div>
 
-      {/* Modal de Login con Google */}
+      {/* Modal Login Google */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
           <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 w-full max-w-md text-center">
             <h3 className="text-2xl font-bold mb-2">Iniciar sesión para votar</h3>
-            <p className="text-zinc-400 mb-6">Usa tu cuenta de Google para participar</p>
+            <p className="text-zinc-400 mb-6">Usa tu cuenta de Google</p>
 
             <button
               onClick={signInWithGoogle}
