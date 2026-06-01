@@ -171,6 +171,16 @@ export default function VotingPage() {
       {/* ══ Contenido ══ */}
       <div className="max-w-6xl mx-auto px-6 py-10">
 
+        <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: "url('/avatar.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+
         {/* ── Hero ── */}
         <motion.div
           className="text-center mb-10"
