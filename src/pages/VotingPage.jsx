@@ -153,17 +153,34 @@ export default function VotingPage() {
   }
 
   return (
-  <div className="min-h-screen">
-    <div className="max-w-6xl mx-auto px-6 py-10 relative overflow-hidden rounded-3xl">
-      {/* Fondo avatar translúcido solo para esta sección */}
-      <div
-        className="absolute inset-0 z-0 bg-center bg-cover bg-no-repeat opacity-15"
-        style={{ backgroundImage: "url('/avatar.jpg')" }}
-      />
-      <div className="absolute inset-0 z-0 bg-black/45 backdrop-blur-[1px]" />
+    <div className="relative min-h-screen">
 
-      {/* Contenido */}
-      <div className="relative z-10">
+      {/* ══ Fondo: imagen de avatar con overlay oscuro ══ */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: "url('/avatar.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+      {/* Overlay translúcido — ajusta la opacidad aquí (0.80–0.90) */}
+      <div className="fixed inset-0 -z-10 bg-zinc-950/85" />
+
+      {/* ══ Contenido ══ */}
+      <div className="max-w-6xl mx-auto px-6 py-10">
+
+        <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: "url('/avatar.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+
         {/* ── Hero ── */}
         <motion.div
           className="text-center mb-10"
@@ -172,17 +189,16 @@ export default function VotingPage() {
           animate="show"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold tracking-[3px] uppercase mb-5">
-            Concurso 2026
+            EDICION 2026
           </div>
-
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-none">
             Elige el mejor granizado
           </h1>
-
           <p className="text-zinc-400 mt-3 text-base">
-            Inicia sesión con Google · 1 voto por ciudad
+            Inicia sesión con Google para votar
           </p>
 
+          {/* Instagram */}
           <a
             href={IG_URL}
             target="_blank"
@@ -210,7 +226,6 @@ export default function VotingPage() {
                 <span className="text-zinc-500">Conectado como </span>
                 <span className="font-medium text-white">{user.email}</span>
               </div>
-
               <button
                 onClick={handleLogout}
                 className="flex items-center justify-center gap-2 px-5 py-2 text-sm rounded-xl
@@ -222,12 +237,12 @@ export default function VotingPage() {
           )}
         </AnimatePresence>
 
-        {/* ── Tabs ── */}
+        {/* ── Tabs de ciudad ── */}
         <motion.div variants={fadeUp} initial="hidden" animate="show">
           <CityTabs active={activeCity} onChange={setActiveCity} />
         </motion.div>
 
-        {/* ── Grid ── */}
+        {/* ── Grid de lugares ── */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeCity}
@@ -273,8 +288,8 @@ export default function VotingPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
       </div>
     </div>
-  </div>
-)
+  )
 }
