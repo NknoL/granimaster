@@ -200,4 +200,5 @@ export default function VotingPage() {
       )}
     </div>
   )
+  
 }
