@@ -147,7 +147,7 @@ export default function VotingPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -178,7 +178,7 @@ export default function VotingPage() {
           initial="hidden"
           animate="show"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold tracking-[3px] uppercase mb-5">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold tracking-[3px] uppercase mb-5">
             Concurso 2026
           </div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-none">
@@ -269,7 +269,7 @@ export default function VotingPage() {
               <button
                 onClick={signInWithGoogle}
                 className="px-8 py-3.5 bg-white text-black font-semibold rounded-2xl
-                           inline-flex items-center gap-3 hover:bg-cyan-400
+                           inline-flex items-center gap-3 hover:bg-red-400
                            active:scale-95 transition-all duration-150"
               >
                 <LogIn size={20} />
