@@ -39,7 +39,7 @@ const PLACES = {
   ]
 }
 
-const MOSTRAR_CONTEOS = false
+const CONCURSO_FINALIZADO = false
 
 export default function VotingPage() {
   const [activeCity, setActiveCity] = useState('Bucaramanga')
@@ -48,19 +48,12 @@ export default function VotingPage() {
   const [showCedulaModal, setShowCedulaModal] = useState(false)
   const [cedulaInput, setCedulaInput] = useState('')
   const [selectedPlace, setSelectedPlace] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const fetchCounts = async () => {
-    const { data, error } = await supabase
-      .from('votes')
-      .select('city, place')
-
-    if (error) {
-      console.error('Error fetching votes:', error)
-      return
-    }
-
+    const { data } = await supabase.from('votes').select('city, place')
     const grouped = {}
-    data.forEach(vote => {
+    data?.forEach(vote => {
       if (!grouped[vote.city]) grouped[vote.city] = {}
       grouped[vote.city][vote.place] = (grouped[vote.city][vote.place] || 0) + 1
     })
@@ -69,19 +62,13 @@ export default function VotingPage() {
 
   useEffect(() => {
     fetchCounts()
-
-    const savedVotes = localStorage.getItem('granimaster_voted')
-    if (savedVotes) {
-      setVoted(JSON.parse(savedVotes))
-    }
+    const saved = localStorage.getItem('granimaster_voted')
+    if (saved) setVoted(JSON.parse(saved))
   }, [])
 
-  // Abrir modal para pedir cédula
   const handleVoteClick = (place) => {
     if (voted[activeCity]) {
-      toast.error(`Ya votaste en ${activeCity}`, {
-        description: 'Solo puedes votar una vez por ciudad.'
-      })
+      toast.error(`Ya votaste en ${activeCity}`)
       return
     }
     setSelectedPlace(place)
@@ -89,137 +76,199 @@ export default function VotingPage() {
     setShowCedulaModal(true)
   }
 
-  // Registrar voto con cédula
-  const submitVoteWithCedula = async () => {
+  const submitVote = async () => {
     if (!cedulaInput.trim()) {
-      toast.error('Por favor ingresa tu número de cédula')
+      toast.error('Ingresa tu número de cédula')
       return
     }
+    setIsSubmitting(true)
 
-    // Verificar si ya votó con esa cédula en esta ciudad
-    const { data: existingVote } = await supabase
+    const { data: existing } = await supabase
       .from('votes')
       .select('id')
       .eq('city', activeCity)
       .eq('cedula', cedulaInput.trim())
       .maybeSingle()
 
-    if (existingVote) {
+    if (existing) {
       toast.error('Ya votaste con esta cédula en esta ciudad')
+      setIsSubmitting(false)
       setShowCedulaModal(false)
       return
     }
 
-    // Registrar el voto
-    const { error } = await supabase
-      .from('votes')
-      .insert({
-        city: activeCity,
-        place: selectedPlace,
-        cedula: cedulaInput.trim()
-      })
+    const { error } = await supabase.from('votes').insert({
+      city: activeCity,
+      place: selectedPlace,
+      cedula: cedulaInput.trim()
+    })
 
     if (error) {
       toast.error('Error al registrar el voto')
+      setIsSubmitting(false)
       return
     }
 
-    // Marcar como votado en este navegador
     const newVoted = { ...voted, [activeCity]: selectedPlace }
     setVoted(newVoted)
     localStorage.setItem('granimaster_voted', JSON.stringify(newVoted))
 
-    toast.success('¡Voto registrado correctamente!', {
-      description: `${selectedPlace} en ${activeCity}`
-    })
-
+    toast.success('¡Voto registrado!')
     setShowCedulaModal(false)
     setCedulaInput('')
+    setIsSubmitting(false)
     fetchCounts()
   }
 
   const cityPlaces = PLACES[activeCity] || []
-  const cityCounts = counts[activeCity] || {}
 
+  // === Calcular Top 3 General y por ciudad ===
+  const allPlacesWithVotes = []
+  Object.keys(PLACES).forEach(city => {
+    PLACES[city].forEach(place => {
+      allPlacesWithVotes.push({
+        city,
+        name: place.name,
+        votos: counts[city]?.[place.name] || 0
+      })
+    })
+  })
+
+  const top3General = [...allPlacesWithVotes]
+    .sort((a, b) => b.votos - a.votos)
+    .slice(0, 3)
+
+  const getTop3ByCity = (city) => {
+    return PLACES[city]
+      .map(p => ({
+        name: p.name,
+        votos: counts[city]?.[p.name] || 0
+      }))
+      .sort((a, b) => b.votos - a.votos)
+      .slice(0, 3)
+  }
+
+  if (CONCURSO_FINALIZADO) {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-10">
+        <div className="text-center mb-10">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-sm font-medium mb-4">
+            CONCURSO FINALIZADO
+          </div>
+          <h1 className="text-6xl font-bold tracking-tighter">Resultados Oficiales</h1>
+        </div>
+
+        {/* Top 3 General */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold mb-4 text-center">🏆 Top 3 General</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {top3General.map((place, index) => (
+              <div key={index} className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 text-center">
+                <div className="text-4xl mb-2">{index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}</div>
+                <div className="font-semibold text-lg">{place.name}</div>
+                <div className="text-sm text-zinc-400">{place.city}</div>
+                <div className="text-4xl font-mono font-bold text-cyan-400 mt-2">{place.votos}</div>
+                <div className="text-sm text-zinc-400">votos</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Top 3 por Ciudad */}
+        <div>
+          <h2 className="text-2xl font-semibold mb-6 text-center">Top 3 por Ciudad</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {Object.keys(PLACES).map(city => {
+              const top3 = getTop3ByCity(city)
+              return (
+                <div key={city} className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+                  <h3 className="font-semibold text-xl mb-4 text-center">{city}</h3>
+                  <div className="space-y-4">
+                    {top3.map((place, index) => (
+                      <div key={index} className="flex justify-between items-center border-b border-zinc-800 pb-3 last:border-none">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}</span>
+                          <span className="font-medium">{place.name}</span>
+                        </div>
+                        <span className="font-mono text-cyan-400 font-semibold">{place.votos} votos</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Modo votación normal
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
-      {/* Header */}
       <div className="text-center mb-10">
         <div className="inline-block px-4 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium tracking-[3px] mb-4">
           CONCURSO 2026
         </div>
         <h1 className="text-6xl md:text-7xl font-bold tracking-tighter">Elige el mejor granizado</h1>
-        <p className="text-xl text-zinc-400 mt-3 max-w-md mx-auto">
-          Vota por tu lugar favorito en tu ciudad. Un voto por ciudad.
-        </p>
       </div>
 
       <CityTabs active={activeCity} onChange={setActiveCity} />
 
-      {/* Grid de lugares */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-        {cityPlaces.map(placeObj => (
+        {PLACES[activeCity].map(placeObj => (
           <PlaceCard
             key={placeObj.name}
             place={placeObj.name}
             instagram={placeObj.instagram}
-            count={MOSTRAR_CONTEOS ? (cityCounts[placeObj.name] || 0) : 0}
+            count={0}
             hasVoted={voted[activeCity]}
             onVote={() => handleVoteClick(placeObj.name)}
           />
         ))}
       </div>
 
-      {/* Modal para pedir Cédula */}
+      {/* Modal de Cédula */}
       {showCedulaModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 w-full max-w-md mx-4">
-            <h3 className="text-2xl font-bold mb-2">Verificación de identidad</h3>
-            <p className="text-zinc-400 mb-6">
-              Ingresa tu número de cédula para registrar tu voto en <strong>{activeCity}</strong>
-            </p>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md p-8">
+            <div className="text-center mb-6">
+              <div className="mx-auto w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4">
+                <span className="text-3xl">🪪</span>
+              </div>
+              <h3 className="text-2xl font-bold">Verificación de Voto</h3>
+              <p className="text-zinc-400 mt-2 text-sm">
+                Ingresa tu cédula para confirmar tu voto en <strong>{activeCity}</strong>
+              </p>
+            </div>
 
             <input
               type="text"
               value={cedulaInput}
               onChange={(e) => setCedulaInput(e.target.value)}
               placeholder="Número de cédula"
-              className="w-full bg-black border border-zinc-700 focus:border-cyan-500 rounded-2xl px-5 py-4 text-xl tracking-widest text-center outline-none mb-6"
-              onKeyDown={(e) => e.key === 'Enter' && submitVoteWithCedula()}
+              className="w-full bg-black border border-zinc-700 focus:border-cyan-500 rounded-2xl px-6 py-4 text-2xl tracking-[6px] text-center outline-none mb-6 font-mono"
+              disabled={isSubmitting}
             />
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  setShowCedulaModal(false)
-                  setCedulaInput('')
-                }}
-                className="flex-1 py-3 rounded-2xl border border-zinc-700 hover:bg-zinc-800 transition"
+                onClick={() => setShowCedulaModal(false)}
+                className="flex-1 py-3.5 rounded-2xl border border-zinc-700 hover:bg-zinc-800 transition"
               >
                 Cancelar
               </button>
               <button
-                onClick={submitVoteWithCedula}
-                className="flex-1 py-3 rounded-2xl bg-white text-black font-semibold hover:bg-cyan-400 transition"
+                onClick={submitVote}
+                disabled={isSubmitting || !cedulaInput.trim()}
+                className="flex-1 py-3.5 rounded-2xl bg-white text-black font-semibold hover:bg-cyan-400 transition"
               >
-                Confirmar Voto
+                {isSubmitting ? "Registrando..." : "Confirmar Voto"}
               </button>
             </div>
-
-            <p className="text-center text-[10px] text-zinc-500 mt-4">
-              Tu cédula solo se usa para evitar votos duplicados.
-            </p>
           </div>
         </div>
       )}
-
-      <div className="mt-12 text-center">
-        <p className="text-xs text-zinc-500">
-          {MOSTRAR_CONTEOS 
-            ? "Los resultados se actualizan en tiempo real" 
-            : "Los conteos se mostrarán cuando termine el concurso"}
-        </p>
-      </div>
     </div>
   )
 }

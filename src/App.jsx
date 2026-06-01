@@ -7,7 +7,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-zinc-950 text-white">
-        {/* Navbar */}
+        {/* Navbar - Solo botón de Votar (Supervisor oculto) */}
         <nav className="border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-md sticky top-0 z-50">
           <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
@@ -20,26 +20,20 @@ function App() {
               </div>
             </Link>
 
-            <div className="flex items-center gap-2 text-sm">
-              <Link 
-                to="/" 
-                className="px-4 py-2 rounded-xl hover:bg-zinc-900 transition"
-              >
-                Votar
-              </Link>
-              <Link 
-                to="/supervisor" 
-                className="px-5 py-2 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 transition flex items-center gap-2 text-sm"
-              >
-                Supervisor
-              </Link>
-            </div>
+            {/* Solo botón de Votar (Supervisor oculto del público) */}
+            <Link 
+              to="/" 
+              className="px-5 py-2 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 transition text-sm"
+            >
+              Votar
+            </Link>
           </div>
         </nav>
 
         <Routes>
           <Route path="/" element={<VotingPage />} />
-          <Route path="/supervisor" element={<AdminDashboard />} />
+          {/* Ruta protegida y difícil de adivinar */}
+          <Route path="/panel-x7k9p2" element={<AdminDashboard />} />
         </Routes>
       </div>
 
