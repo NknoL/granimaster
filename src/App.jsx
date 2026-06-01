@@ -5,6 +5,7 @@ import { Toaster } from 'sonner'
 
 import VotingPage from './pages/VotingPage'
 import AdminDashboard from './pages/AdminDashboard'
+
 function App() {
   // Limpieza al recargar si está logueado
   useEffect(() => {
@@ -19,7 +20,6 @@ function App() {
           caches.keys().then(keys => keys.forEach(key => caches.delete(key)))
         }
 
-        // Refrescar solo una vez
         if (!sessionStorage.getItem('refreshedAfterLogin')) {
           sessionStorage.setItem('refreshedAfterLogin', 'true')
           window.location.reload()
@@ -36,7 +36,7 @@ function App() {
         <Routes>
           <Route path="/" element={<VotingPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/panel-x7k9p2" element={<SecretPanel />} />
+          <Route path="/panel-x7k9p2" element={<AdminDashboard />} />
         </Routes>
       </div>
       <Toaster position="top-center" richColors closeButton />

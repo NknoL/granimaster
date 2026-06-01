@@ -35,7 +35,6 @@ export default function VotingPage() {
 
       const [allVotesRes, userVotesRes] = await Promise.all(promises)
 
-      // Conteos globales
       const grouped = {}
       allVotesRes.data?.forEach(vote => {
         if (!grouped[vote.city]) grouped[vote.city] = {}
@@ -43,7 +42,6 @@ export default function VotingPage() {
       })
       setCounts(grouped)
 
-      // Votos del usuario actual
       if (userVotesRes?.data) {
         const userVoted = {}
         userVotesRes.data.forEach(v => {
@@ -117,7 +115,6 @@ export default function VotingPage() {
     setVoted(prev => ({ ...prev, [city]: place }))
     toast.success('¡Voto registrado!', { description: `${place} en ${city}` })
 
-    // Actualizar conteos localmente
     setCounts(prev => {
       const newCounts = { ...prev }
       if (!newCounts[city]) newCounts[city] = {}
@@ -165,6 +162,7 @@ export default function VotingPage() {
             count={counts[activeCity]?.[place] || 0}
             hasVoted={voted[activeCity]}
             onVote={() => handleVote(activeCity, place)}
+            // instagram="@"   ← Puedes agregar Instagram aquí después
           />
         ))}
       </div>
