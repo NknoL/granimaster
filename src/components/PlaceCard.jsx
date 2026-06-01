@@ -2,41 +2,38 @@ import { motion, useAnimation } from 'framer-motion'
 import { Instagram, CheckCircle2 } from 'lucide-react'
 
 const IG_HANDLES = {
-  // Bucaramanga
-  "Granifreseo":         "granifreseo11",
-  "Mundo8ice":           "granizados_mundo8ice_bga",
-  "Frozen Shark":        "frozenshark_11",
-  "Trinislush":          "trinislush",
-  "Granibucaros":        "grani_bucaros",
-  "Crack granizados":    "crack.granizados",
-  "Tamy ice":            "tamy_ice",
-  "420Slushy":           "420slushy_",
-  "Mafia cocktails":     "mafiacocktails",
-  "Necati cocktails":    "necati.cocktails",
-  "Granilocos":          "granilocos__oficial",
-  "Eclipse cocktail":    "eclipsecocktail",
-  "Blueice":             "blueicegranizado",
-  "Ice flow":            "iceflowbga",
-  "Nova ice":            "novaiceoficiall",
-  // Girón
-  "Graniizu ice":        "graniizu_ice",
-  "Luna yena":           "granizadoslunayena",
-  "Urban slush":         "urban_slush",
-  "Exotic slush":        "exoticslushbga",
-  "Cool hot":            "granizadoscoolhot",
-  // Floridablanca
+  "Granifreseo": "granifreseo11",
+  "Mundo8ice": "granizados_mundo8ice_bga",
+  "Frozen Shark": "frozenshark_11",
+  "Trinislush": "trinislush",
+  "Granibucaros": "grani_bucaros",
+  "Crack granizados": "crack.granizados",
+  "Tamy ice": "tamy_ice",
+  "420Slushy": "420slushy_",
+  "Mafia cocktails": "mafiacocktails",
+  "Necati cocktails": "necati.cocktails",
+  "Granilocos": "granilocos__oficial",
+  "Eclipse cocktail": "eclipsecocktail",
+  "Blueice": "blueicegranizado",
+  "Ice flow": "iceflowbga",
+  "Nova ice": "novaiceoficiall",
+  "Graniizu ice": "graniizu_ice",
+  "Luna yena": "granizadoslunayena",
+  "Urban slush": "urban_slush",
+  "Exotic slush": "exoticslushbga",
+  "Cool hot": "granizadoscoolhot",
   "Refreshment station": "refreshment_station",
-  "Crazy Drinks":        "crazydrinks30",
-  "Portal granizados":   "portal_granizados",
-  "Spacebuddies":        "spacebuddiesoficial",
-  "Mafia":               "mafia_lacumbre",
+  "Crazy Drinks": "crazydrinks30",
+  "Portal granizados": "portal_granizados",
+  "Spacebuddies": "spacebuddiesoficial",
+  "Mafia": "mafia_lacumbre",
 }
 
 export default function PlaceCard({ place, count, hasVoted, onVote }) {
-  const controls    = useAnimation()
+  const controls = useAnimation()
   const isVotedHere = hasVoted === place
-  const cityVoted   = !!hasVoted
-  const igHandle    = IG_HANDLES[place]
+  const cityVoted = !!hasVoted
+  const igHandle = IG_HANDLES[place]
 
   const handleClick = async () => {
     if (cityVoted) {
@@ -46,10 +43,12 @@ export default function PlaceCard({ place, count, hasVoted, onVote }) {
       })
       return
     }
+
     await controls.start({
       scale: [1, 0.95, 1.04, 1],
       transition: { duration: 0.3 }
     })
+
     onVote()
   }
 
@@ -59,7 +58,7 @@ export default function PlaceCard({ place, count, hasVoted, onVote }) {
       whileTap={!cityVoted ? { scale: 0.97 } : {}}
       onClick={handleClick}
       className={`
-        group relative flex flex-col justify-between gap-4
+        group relative h-full flex flex-col justify-between gap-4
         rounded-2xl border p-5 cursor-pointer select-none
         transition-colors duration-200
         ${isVotedHere
@@ -70,11 +69,11 @@ export default function PlaceCard({ place, count, hasVoted, onVote }) {
         }
       `}
     >
-      {/* ── Nombre + check ── */}
       <div className="flex items-start justify-between gap-2">
         <span className={`font-semibold text-base leading-tight ${isVotedHere ? 'text-red-300' : 'text-white'}`}>
           {place}
         </span>
+
         {isVotedHere && (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -86,10 +85,9 @@ export default function PlaceCard({ place, count, hasVoted, onVote }) {
         )}
       </div>
 
-      {/* ── Contador + handle IG ── */}
       <div className="flex items-end justify-between">
         <div>
-          {count > 99999999999999 && (
+          {count > 9999999999 && (
             <>
               <span className={`text-4xl font-mono font-bold tabular-nums ${isVotedHere ? 'text-red-400' : 'text-white'}`}>
                 {count}
@@ -113,25 +111,19 @@ export default function PlaceCard({ place, count, hasVoted, onVote }) {
         )}
       </div>
 
-      {/* ── Botón votar ── */}
-      {!cityVoted && (
-        <div className="mt-1">
-          <div className="w-full py-2 rounded-xl bg-white/5 border border-zinc-700
-                          text-center text-sm font-medium text-zinc-300
-                          group-hover:bg-red-500 group-hover:border-red-500 group-hover:text-black
-                          transition-all duration-200">
-            Votar
+      <div className="mt-1 min-h-[52px] flex items-center">
+        {!cityVoted && (
+          <div className="w-full py-2 rounded-xl bg-white/5 border border-zinc-700 text-center text-sm font-medium text-zinc-300 group-hover:bg-red-500 group-hover:border-red-500 group-hover:text-black transition-all duration-200">
+            Votar por este lugar
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Badge "Tu voto" ── */}
-      {isVotedHere && (
-        <div className="mt-1 w-full py-2 rounded-xl bg-red-500/20 border border-red-500/30
-                        text-center text-sm font-semibold text-red-300">
-          ✓ Tu voto
-        </div>
-      )}
+        {isVotedHere && (
+          <div className="w-full py-2 rounded-xl bg-red-500/20 border border-red-500/30 text-center text-sm font-semibold text-red-300">
+            ✓ Tu voto de hoy
+          </div>
+        )}
+      </div>
     </motion.div>
   )
 }
