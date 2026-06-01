@@ -76,7 +76,6 @@ export default function AdminDashboard() {
 
   const totalVotes = votes.length
   const uniqueVoters = uniqueEmails.size
-
   const cityChartData = Object.entries(cityTotals).map(([ciudad, votos]) => ({ ciudad, votos }))
 
   const top3General = Object.entries(placeTotals).sort((a, b) => b[1] - a[1]).slice(0, 3)
@@ -95,7 +94,6 @@ export default function AdminDashboard() {
           <Trophy className="mx-auto text-cyan-400 mb-4" size={40} />
           <h2 className="text-3xl font-bold">Panel de Supervisión</h2>
           <p className="text-zinc-400 text-sm mt-1">/panel-x7k9p2</p>
-
           <input
             type="password"
             value={pin}
@@ -120,9 +118,7 @@ export default function AdminDashboard() {
             SUPERVISOR • AUTO REFRESH 15s
           </div>
           <div className="text-5xl font-bold tracking-tighter">Panel de Supervisión</div>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500 mt-1">Actualizado: {lastUpdated.toLocaleTimeString('es-CO')}</p>
-          )}
+          {lastUpdated && <p className="text-xs text-zinc-500 mt-1">Actualizado: {lastUpdated.toLocaleTimeString('es-CO')}</p>}
         </div>
         <div className="flex gap-3">
           <button onClick={loadVotes} className="flex items-center gap-2 px-5 py-3 bg-zinc-900 rounded-2xl border border-zinc-700 text-sm">
@@ -224,14 +220,18 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {votes.slice(0, 80).map((v, i) => (
-                <tr key={i} className="border-b border-zinc-800">
-                  <td className="py-3">{v.city}</td>
-                  <td>{v.place}</td>
-                  <td className="text-xs text-zinc-400">{v.email || '—'}</td>
-                  <td className="text-xs text-zinc-400">{new Date(v.created_at).toLocaleString('es-CO')}</td>
-                </tr>
-              ))}
+              {votes.length > 0 ? (
+                votes.slice(0, 80).map((v, i) => (
+                  <tr key={i} className="border-b border-zinc-800">
+                    <td className="py-3">{v.city}</td>
+                    <td>{v.place}</td>
+                    <td className="text-xs text-zinc-400">{v.email || '—'}</td>
+                    <td className="text-xs text-zinc-400">{new Date(v.created_at).toLocaleString('es-CO')}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="4" className="py-8 text-center text-zinc-400">No hay votos registrados</td></tr>
+              )}
             </tbody>
           </table>
         </div>
