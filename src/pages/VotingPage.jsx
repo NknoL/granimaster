@@ -144,7 +144,7 @@ export default function VotingPage() {
     let timer
     if (loading) {
       timer = setTimeout(() => {
-        alert("CONEXION DE INTERNET INESTABLE")
+        alert("Por seguiridad hemos cerrado tu seccion, tu votos actuales se han registrado!!")
         localStorage.clear()
         sessionStorage.clear()
         if ('caches' in window) {
