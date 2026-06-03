@@ -47,6 +47,7 @@ const RANGE_OPTIONS = [
 
 const PAGE_SIZE = 50
 const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'Grm2026xK9pL'
+const STORAGE_KEY = 'admin-dashboard-filters-v1'
 
 export default function AdminDashboard() {
   const [pin, setPin] = useState('')
@@ -86,10 +87,41 @@ export default function AdminDashboard() {
   }, [selectedCity, allPlaces])
 
   useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (!saved) return
+
+    try {
+      const parsed = JSON.parse(saved)
+      if (parsed.rangeType) setRangeType(parsed.rangeType)
+      if (parsed.customStart) setCustomStart(parsed.customStart)
+      if (parsed.customEnd) setCustomEnd(parsed.customEnd)
+      if (parsed.selectedCity) setSelectedCity(parsed.selectedCity)
+      if (parsed.selectedPlace) setSelectedPlace(parsed.selectedPlace)
+      if (typeof parsed.searchEmail === 'string') setSearchEmail(parsed.searchEmail)
+    } catch (e) {
+      console.error('Error restoring filters:', e)
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        rangeType,
+        customStart,
+        customEnd,
+        selectedCity,
+        selectedPlace,
+        searchEmail
+      })
+    )
+  }, [rangeType, customStart, customEnd, selectedCity, selectedPlace, searchEmail])
+
+  useEffect(() => {
     if (selectedPlace !== 'all' && !availablePlacesByCity.includes(selectedPlace)) {
       setSelectedPlace('all')
     }
-  }, [selectedCity])
+  }, [selectedCity, availablePlacesByCity, selectedPlace])
 
   useEffect(() => {
     setTablePage(0)
@@ -148,10 +180,10 @@ export default function AdminDashboard() {
     return { start: null, end: null, label: 'Histórico' }
   }
 
-  const buildVotesQuery = ({ withCount = false }) => {
+  const buildVotesQuery = () => {
     let query = supabase
       .from('votes')
-      .select('city, place, email, created_at, user_id', withCount ? { count: 'exact' } : undefined)
+      .select('city, place, email, created_at, user_id')
       .order('created_at', { ascending: false })
 
     const { start, end } = getDateRange()
@@ -180,23 +212,14 @@ export default function AdminDashboard() {
   const fetchAllRows = async (baseQuery) => {
     const chunkSize = 1000
     let from = 0
-    let keepGoing = true
     let allRows = []
 
-    while (keepGoing) {
+    while (true) {
       const { data, error: fetchError } = await baseQuery.range(from, from + chunkSize - 1)
-
       if (fetchError) throw fetchError
-
-      if (data?.length) {
-        allRows = allRows.concat(data)
-      }
-
-      if (!data || data.length < chunkSize) {
-        keepGoing = false
-      } else {
-        from += chunkSize
-      }
+      if (data?.length) allRows = allRows.concat(data)
+      if (!data || data.length < chunkSize) break
+      from += chunkSize
     }
 
     return allRows
@@ -254,7 +277,7 @@ export default function AdminDashboard() {
     setError(null)
 
     try {
-      const rows = await fetchAllRows(buildVotesQuery({ withCount: false }))
+      const rows = await fetchAllRows(buildVotesQuery())
       setPeriodVotes(rows)
       setLastUpdated(new Date())
     } catch (err) {
@@ -303,8 +326,7 @@ export default function AdminDashboard() {
     if (voterKey) periodUniqueVoters.add(voterKey)
 
     const date = new Date(v.created_at)
-    const hour = date.getHours()
-    votesByHour[hour].votos += 1
+    votesByHour[date.getHours()].votos += 1
 
     const dayKey = formatDateInput(date)
     votesByDayMap[dayKey] = (votesByDayMap[dayKey] || 0) + 1
