@@ -277,7 +277,7 @@ export default function AdminDashboard() {
     loadAll()
     const interval = setInterval(() => {
       loadAll()
-    }, 15000)
+    }, 30000)
     return () => clearInterval(interval)
   }, [isAuthed])
 
@@ -457,7 +457,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6 mb-8">
         <div>
           <p className="text-xs font-semibold tracking-[4px] uppercase text-zinc-500 mb-1">
-            Supervisor · Auto refresh 15s
+            Supervisor · Auto refresh 30s
           </p>
           <h1 className="text-3xl font-bold tracking-tight text-white">Panel de Supervisión</h1>
           <p className="text-xs text-zinc-500 mt-2">
