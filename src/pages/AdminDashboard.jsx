@@ -23,12 +23,11 @@ export default function AdminDashboard() {
     setLoading(true)
     setError(null)
 
-    // ✅ FIX: Quitamos el límite de 1000 filas
     const { data, error: fetchError } = await supabase
       .from('votes')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(50000)                    // ← Límite alto para que traiga todo
+      .limit(50000)
 
     if (fetchError) {
       console.error('Error cargando votos:', fetchError)
@@ -46,7 +45,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!isAuthed) return
     loadVotes()
-    const interval = setInterval(loadVotes, 10000) // cada 10s
+    const interval = setInterval(loadVotes, 10000)
     return () => clearInterval(interval)
   }, [isAuthed])
 
